@@ -4,7 +4,9 @@ const bcrypt = require('bcryptjs');
 const UserSchema = new mongoose.Schema({
     username: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true }
+    password: { type: String, required: true },
+    is_banned: { type: Boolean, default: false },
+    is_admin: { type: Boolean, default: false }
 }, {
     timestamps: true // Tự động tạo createdAt và updatedAt
 });
@@ -15,7 +17,7 @@ UserSchema.pre('save', async function (next) {
     if (!this.isModified('password')) {
         return next();
     }
-    
+
     // Tạo muối (salt) và băm (hash)
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);

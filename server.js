@@ -11,7 +11,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Import Routes
-const courseRoutes = require('./src/routes/courseRoutes');
+const commentRoutes = require('./src/routes/commentRoutes');
 const authRoutes = require('./src/routes/authRoutes');
 //
 var cors = require('cors');// Thêm thư viện cors
@@ -23,7 +23,7 @@ app.use(express.json());
 
 // --- ROUTES ---
 // Mount (gắn) route vào đường dẫn gốc /api/courses
-app.use('/api/courses', courseRoutes);
+app.use('/api/comments', commentRoutes);
 app.use('/api/auth', authRoutes);
 //
 // Route mặc định trang chủ
