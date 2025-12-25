@@ -11,6 +11,19 @@ const commentSchema = new mongoose.Schema({
         ref: 'User', // This must match the name used in mongoose.model('User', ...)
         required: true
     },
+    parentComment: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Comment',
+        default: null
+    },
+    replies: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Comment'
+    }],
+    depth: {
+        type: Number,
+        default: 0
+    },
     createdAt: {
         type: Date,
         default: Date.now

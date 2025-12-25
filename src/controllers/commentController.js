@@ -1,11 +1,22 @@
 const Comment = require('../models/commentModel');
 
 // [GET] /api/comments
-// Lấy tất cả bình luận
+// Lấy tất cả bình luận (theo cấu trúc cây)
 exports.getAllComments = async (req, res) => {
     try {
-        // .populate('user', 'username') giúp lấy thông tin username từ bảng User dựa vào ID
-        const comments = await Comment.find().populate('user', 'username');
+        // Chỉ lấy các comment gốc (depth = 0) và populate replies lồng nhau
+        const comments = await Comment.find({ parentComment: null })
+            .populate('user', 'username')
+            .populate({
+                path: 'replies',
+                populate: [
+                    { path: 'user', select: 'username' },
+                    {
+                        path: 'replies',
+                        populate: { path: 'user', select: 'username' }
+                    }
+                ]
+            });
 
         res.status(200).json({
             success: true,
@@ -21,7 +32,18 @@ exports.getAllComments = async (req, res) => {
 // Lấy chi tiết 1 bình luận
 exports.getCommentById = async (req, res) => {
     try {
-        const comment = await Comment.findById(req.params.id).populate('user', 'username');
+        const comment = await Comment.findById(req.params.id)
+            .populate('user', 'username')
+            .populate({
+                path: 'replies',
+                populate: [
+                    { path: 'user', select: 'username' },
+                    {
+                        path: 'replies',
+                        populate: { path: 'user', select: 'username' }
+                    }
+                ]
+            });
 
         if (!comment) {
             return res.status(404).json({ success: false, message: 'Không tìm thấy comment' });
@@ -38,22 +60,48 @@ exports.getCommentById = async (req, res) => {
 };
 
 // [POST] /api/comments
-// Tạo bình luận mới
+// Tạo bình luận mới (hoặc trả lời bình luận)
 exports.createComment = async (req, res) => {
     try {
-        const { content } = req.body;
+        const { content, parentCommentId } = req.body;
 
         // Validate đơn giản
         if (!content) {
             return res.status(400).json({ success: false, message: 'Vui lòng nhập nội dung bình luận' });
         }
 
+        let depth = 0;
+        let parentComment = null;
+
+        // Xử lý logic trả lời comment
+        if (parentCommentId) {
+            parentComment = await Comment.findById(parentCommentId);
+            if (!parentComment) {
+                return res.status(404).json({ success: false, message: 'Comment cha không tồn tại' });
+            }
+
+            // Kiểm tra độ sâu (max depth = 2: 0 -> 1 -> 2)
+            if (parentComment.depth >= 2) {
+                return res.status(400).json({ success: false, message: 'Không thể trả lời comment này (đã đạt độ sâu tối đa)' });
+            }
+
+            depth = parentComment.depth + 1;
+        }
+
         // Tạo comment mới
         // req.user._id lấy từ middleware protect (authMiddleware)
         const newComment = await Comment.create({
             content: content,
-            user: req.user._id
+            user: req.user._id,
+            parentComment: parentCommentId || null,
+            depth: depth
         });
+
+        // Nếu là reply, cập nhật mảng replies của comment cha
+        if (parentComment) {
+            parentComment.replies.push(newComment._id);
+            await parentComment.save();
+        }
 
         // Populate lại để trả về có cả username ngay lập tức (tùy chọn)
         const populatedComment = await newComment.populate('user', 'username');
