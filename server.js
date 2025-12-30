@@ -13,6 +13,7 @@ const PORT = process.env.PORT || 5000;
 // Import Routes
 const commentRoutes = require('./src/routes/commentRoutes');
 const authRoutes = require('./src/routes/authRoutes');
+const adminRoutes = require('./src/routes/adminRoutes');
 //
 var cors = require('cors');// Thêm thư viện cors
 //cors là gì? CORS (Cross-Origin Resource Sharing) là một cơ chế bảo mật của trình duyệt web cho phép hoặc chặn các yêu cầu từ một nguồn (domain) khác với nguồn của trang web hiện tại. Mặc định, trình duyệt sẽ chặn các yêu cầu này để ngăn chặn các cuộc tấn công như Cross-Site Scripting (XSS) và Cross-Site Request Forgery (CSRF).
@@ -25,6 +26,7 @@ app.use(express.json());
 // Mount (gắn) route vào đường dẫn gốc /api/courses
 app.use('/api/comments', commentRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
 //
 // Route mặc định trang chủ
 app.get('/', (req, res) => {

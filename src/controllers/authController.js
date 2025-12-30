@@ -50,6 +50,9 @@ exports.loginUser = async (req, res) => {
 
         // Kiểm tra: Có user đó không? VÀ Mật khẩu có khớp không?
         if (user && (await user.matchPassword(password))) {
+            if (user.is_banned) {
+                return res.status(403).json({ message: 'Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên.' });
+            }
             res.json({
                 _id: user._id,
                 username: user.username,

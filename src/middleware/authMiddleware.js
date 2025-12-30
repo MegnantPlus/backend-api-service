@@ -50,6 +50,14 @@ const protect = async (req, res, next) => {
             });
         }
 
+        // Chặn tài khoản đã bị ban
+        if (req.user.is_banned) {
+            return res.status(403).json({
+                success: false,
+                message: 'Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên.'
+            });
+        }
+
         // --- BƯỚC 4: CHO QUA ---
         // Gán thông tin user vào biến req để Controller phía sau có thể dùng
         next(); 
@@ -63,4 +71,14 @@ const protect = async (req, res, next) => {
     }
 };
 
-module.exports = { protect };
+const adminOnly = (req, res, next) => {
+    if (!req.user || !req.user.is_admin) {
+        return res.status(403).json({
+            success: false,
+            message: 'Chỉ quản trị viên mới được phép thực hiện hành động này.'
+        });
+    }
+    next();
+};
+
+module.exports = { protect, adminOnly };
