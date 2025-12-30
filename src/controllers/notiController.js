@@ -110,12 +110,6 @@ exports.updateNotification = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Không tìm thấy thông báo để sửa' });
         }
 
-        // Kiểm tra xem người sửa có phải là admin không
-        // comment.user là ObjectId, req.user._id là String (hoặc ObjectId), nên cần ép kiểu hoặc dùng toString()
-        if (req.user.is_admin !== true) {
-            return res.status(401).json({ success: false, message: 'Bạn không có quyền sửa thông báo này' });
-        }
-
         // Cập nhật
         notification = await Notification.findByIdAndUpdate(
             req.params.id,
@@ -140,11 +134,6 @@ exports.deleteNotification = async (req, res) => {
 
         if (!notification) {
             return res.status(404).json({ success: false, message: 'Không tìm thấy thông báo để xóa' });
-        }
-
-        // Kiểm tra quyền sở hữu
-        if (req.user.is_admin !== true) {
-            return res.status(401).json({ success: false, message: 'Bạn không có quyền xóa thông báo này' });
         }
 
         await notification.deleteOne(); // Hoặc Notification.findByIdAndDelete(req.params.id);

@@ -9,7 +9,7 @@ const NotiSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User', // This must match the name used in mongoose.model('User', ...)
-        required: user.is_admin == true
+        required: true
     },
     parentNotification: {
         type: mongoose.Schema.Types.ObjectId,
