@@ -2,11 +2,11 @@ const PayOS = require("@payos/node").PayOS;
 const Donation = require('../models/donationModel');
 
 // Khởi tạo đối tượng PayOS bằng các biến môi trường từ file .env
-const payos = new PayOS(
-    process.env.PAYOS_CLIENT_ID,
-    process.env.PAYOS_API_KEY,
-    process.env.PAYOS_CHECKSUM_KEY
-);
+const payos = new PayOS({
+    clientId: process.env.PAYOS_CLIENT_ID,
+    apiKey: process.env.PAYOS_API_KEY,
+    checksumKey: process.env.PAYOS_CHECKSUM_KEY
+});
 
 // [POST] /api/donations/create
 exports.createPaymentLink = async (req, res) => {
@@ -22,7 +22,7 @@ exports.createPaymentLink = async (req, res) => {
             cancelUrl: `${process.env.BASE_URL}/cancel`,
         };
 
-        const paymentLinkResponse = await payos.createPaymentLink(body);
+        const paymentLinkResponse = await payos.paymentRequests.create(body);
 
         // Lưu vào Database với trạng thái PENDING
         await Donation.create({
@@ -41,10 +41,10 @@ exports.createPaymentLink = async (req, res) => {
 // [POST] /api/donations/webhook
 exports.payosWebhook = async (req, res) => {
     try {
-        const webhookData = payos.verifyPaymentWebhookData(req.body);
+        const webhookData = await payos.webhooks.verify(req.body);
 
         // Cập nhật trạng thái trong Database khi thanh toán thành công
-        if (webhookData.code === '00') {
+        if (req.body.code === '00') {
             await Donation.findOneAndUpdate(
                 { orderCode: webhookData.orderCode },
                 { status: 'PAID' }
