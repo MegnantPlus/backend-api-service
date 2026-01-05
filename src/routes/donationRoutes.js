@@ -5,5 +5,6 @@ const { protect } = require('../middleware/authMiddleware');
 
 router.post('/create', protect, donationController.createPaymentLink);
 router.post('/webhook', donationController.payosWebhook);
+router.get('/:orderCode', donationController.getDonationStatus);
 
 module.exports = router;

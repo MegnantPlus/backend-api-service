@@ -61,3 +61,23 @@ exports.payosWebhook = async (req, res) => {
         res.status(400).json({ success: false });
     }
 };
+
+// [GET] /api/donations/:orderCode
+exports.getDonationStatus = async (req, res) => {
+    try {
+        const { orderCode } = req.params;
+        const donation = await Donation.findOne({ orderCode });
+
+        if (!donation) {
+            return res.status(404).json({ success: false, message: "Không tìm thấy đơn hàng" });
+        }
+
+        res.json({ 
+            success: true, 
+            status: donation.status, // Trả về: PENDING hoặc PAID
+            orderCode: donation.orderCode 
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
