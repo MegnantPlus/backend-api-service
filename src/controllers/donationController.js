@@ -32,7 +32,11 @@ exports.createPaymentLink = async (req, res) => {
             description: body.description
         });
 
-        res.status(200).json({ success: true, checkoutUrl: paymentLinkResponse.checkoutUrl });
+        res.status(200).json({
+            success: true,
+            checkoutUrl: paymentLinkResponse.checkoutUrl,
+            qrCode: paymentLinkResponse.qrCode
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
