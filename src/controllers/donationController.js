@@ -1,4 +1,5 @@
-const PayOS = require("@payos/node");
+const PayOS = require("@payos/node").PayOS;
+const Donation = require('../models/donationModel');
 
 // Khởi tạo đối tượng PayOS bằng các biến môi trường từ file .env
 const payos = new PayOS(
