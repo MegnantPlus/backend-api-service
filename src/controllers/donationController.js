@@ -35,7 +35,8 @@ exports.createPaymentLink = async (req, res) => {
         res.status(200).json({
             success: true,
             checkoutUrl: paymentLinkResponse.checkoutUrl,
-            qrCode: paymentLinkResponse.qrCode
+            qrCode: paymentLinkResponse.qrCode,
+            orderCode: orderCode // Trả về mã đơn hàng để Frontend polling
         });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
