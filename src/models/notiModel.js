@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const NotiSchema = new mongoose.Schema({
+    title: {
+        type: String,
+        trim: true,
+        default: null
+    },
     content: {
         type: String,
         required: true

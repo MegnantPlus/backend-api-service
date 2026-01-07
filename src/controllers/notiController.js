@@ -63,7 +63,7 @@ exports.getNotificationById = async (req, res) => {
 // Tạo thông báo mới (hoặc trả lời thông báo)
 exports.createNotification = async (req, res) => {
     try {
-        const { content, parentNotificationId } = req.body;
+        const { title, content, parentNotificationId } = req.body;
 
         // Validate đơn giản
         if (!content) {
@@ -85,6 +85,7 @@ exports.createNotification = async (req, res) => {
 
         // req.user._id lấy từ middleware protect (authMiddleware)
         const newNotification = await Notification.create({
+            title: title ?? undefined,
             content: content,
             user: req.user._id,
             parentNotification: parentNotificationId || null,
@@ -111,9 +112,13 @@ exports.updateNotification = async (req, res) => {
         }
 
         // Cập nhật
+        const updateData = {};
+        if (typeof req.body.content !== 'undefined') updateData.content = req.body.content;
+        if (typeof req.body.title !== 'undefined') updateData.title = req.body.title;
+
         notification = await Notification.findByIdAndUpdate(
             req.params.id,
-            { content: req.body.content },
+            updateData,
             {
                 new: true, // Trả về dữ liệu mới sau khi update
                 runValidators: true // Chạy lại validate của Model
