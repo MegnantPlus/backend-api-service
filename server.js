@@ -16,13 +16,17 @@ const authRoutes = require('./src/routes/authRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
 const notiRoutes = require('./src/routes/notiRoutes');
 const donationRoutes = require('./src/routes/donationRoutes');
-//
-var cors = require('cors');// Thêm thư viện cors
-//cors là gì? CORS (Cross-Origin Resource Sharing) là một cơ chế bảo mật của trình duyệt web cho phép hoặc chặn các yêu cầu từ một nguồn (domain) khác với nguồn của trang web hiện tại. Mặc định, trình duyệt sẽ chặn các yêu cầu này để ngăn chặn các cuộc tấn công như Cross-Site Scripting (XSS) và Cross-Site Request Forgery (CSRF).
-// Sử dụng middleware cors
+const logRoutes = require('./src/routes/logRoutes');
+
+// Import Middleware
+const loggerMiddleware = require('./src/middleware/loggerMiddleware');
+
+var cors = require('cors');
 app.use(cors());
 // Middleware đọc JSON
 app.use(express.json());
+// Middleware ghi lại hành động người dùng
+app.use(loggerMiddleware);
 
 // --- ROUTES ---
 // Mount (gắn) route vào đường dẫn gốc /api/courses
@@ -31,6 +35,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notiRoutes);
 app.use('/api/donations', donationRoutes);
+app.use('/api/logs', logRoutes);
 //
 // Route mặc định trang chủ
 app.get('/', (req, res) => {
