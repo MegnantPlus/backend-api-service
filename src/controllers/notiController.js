@@ -4,19 +4,9 @@ const Notification = require('../models/notiModel');
 // Lấy tất cả bình luận (theo cấu trúc cây)
 exports.getAllNotis = async (req, res) => {
     try {
-        // Chỉ lấy các comment gốc (depth = 0) và populate replies lồng nhau
-        const notifications = await Notification.find({ parentNotification: null })
-            .populate('user', 'username')
-            .populate({
-                path: 'replies',
-                populate: [
-                    { path: 'user', select: 'username' },
-                    {
-                        path: 'replies',
-                        populate: { path: 'user', select: 'username' }
-                    }
-                ]
-            });
+        // Lấy tất cả notifications dạng phẳng, không cây
+        const notifications = await Notification.find()
+            .populate('user', 'username');
 
         res.status(200).json({
             success: true,
@@ -33,17 +23,7 @@ exports.getAllNotis = async (req, res) => {
 exports.getNotificationById = async (req, res) => {
     try {
         const notification = await Notification.findById(req.params.id)
-            .populate('user', 'username')
-            .populate({
-                path: 'replies',
-                populate: [
-                    { path: 'user', select: 'username' },
-                    {
-                        path: 'replies',
-                        populate: { path: 'user', select: 'username' }
-                    }
-                ]
-            });
+            .populate('user', 'username');
 
         if (!notification) {
             return res.status(404).json({ success: false, message: 'Không tìm thấy thông báo' });
@@ -63,32 +43,20 @@ exports.getNotificationById = async (req, res) => {
 // Tạo thông báo mới (hoặc trả lời thông báo)
 exports.createNotification = async (req, res) => {
     try {
-        const { title, content, parentNotificationId } = req.body;
+        const { title, content } = req.body;
 
         // Validate đơn giản
         if (!content) {
             return res.status(400).json({ success: false, message: 'Vui lòng nhập nội dung thông báo' });
         }
 
-        let depth = 0;
-        let parentNotification = null;
-
-        // Xử lý logic tìm thông báo 
-        if (parentNotificationId) {
-            parentNotification = await Notification.findById(parentNotificationId);
-            if (!parentNotification) {
-                return res.status(404).json({ success: false, message: 'Không tìm thấy thông báo' });
-            }
-        }
-
-        // Tạo thông báo mới không reply
+        // Tạo thông báo mới dạng phẳng
 
         // req.user._id lấy từ middleware protect (authMiddleware)
         const newNotification = await Notification.create({
             title: title ?? undefined,
             content: content,
             user: req.user._id,
-            parentNotification: parentNotificationId || null,
         });
 
         // Populate lại để trả về có cả username ngay lập tức (tùy chọn)

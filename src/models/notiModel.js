@@ -16,11 +16,6 @@ const NotiSchema = new mongoose.Schema({
         ref: 'User', // This must match the name used in mongoose.model('User', ...)
         required: true
     },
-    parentNotification: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Notification',
-        default: null
-    },
     createdAt: {
         type: Date,
         default: Date.now
