@@ -14,24 +14,23 @@ const loggerMiddleware = (req, res, next) => {
         return originalJson.call(this, data);
     };
 
-    // Lưu thông tin request
-    const logData = {
-        user: req.user ? req.user._id : null,
-        method: req.method,
-        endpoint: req.originalUrl,
-        ip: req.ip || req.connection.remoteAddress,
-        requestBody: ['POST', 'PUT', 'PATCH'].includes(req.method) ? req.body : null,
-        userAgent: req.get('user-agent'),
-        action: mapActionFromMethod(req.method, req.originalUrl),
-        description: generateDescription(req.method, req.originalUrl, req.user),
-        timestamp: new Date()
-    };
-
     // Capture response status và body
     res.on('finish', async () => {
         try {
-            logData.statusCode = res.statusCode;
-            logData.responseBody = res.locals.responseBody || null;
+            // Tạo logData ở đây để lấy req.user sau khi protect middleware đã chạy
+            const logData = {
+                user: req.user ? req.user._id : null,
+                method: req.method,
+                endpoint: req.originalUrl,
+                ip: req.ip || req.connection.remoteAddress,
+                requestBody: ['POST', 'PUT', 'PATCH'].includes(req.method) ? req.body : null,
+                userAgent: req.get('user-agent'),
+                action: mapActionFromMethod(req.method, req.originalUrl),
+                description: generateDescription(req.method, req.originalUrl, req.user),
+                statusCode: res.statusCode,
+                responseBody: res.locals.responseBody || null,
+                timestamp: new Date()
+            };
 
             // Loại bỏ sensitive data từ request body
             if (logData.requestBody && logData.requestBody.password) {
