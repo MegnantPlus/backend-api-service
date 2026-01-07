@@ -39,16 +39,21 @@ const loggerMiddleware = (req, res, next) => {
 
             // Chỉ lưu logs cho status code >= 400 hoặc action quan trọng
             // Hoặc tùy chọn lưu tất cả
-            if (
+            const shouldLog = (
                 res.statusCode >= 400 ||
                 ['CREATE', 'UPDATE', 'DELETE'].includes(logData.action) ||
                 logData.endpoint.includes('/admin') ||
                 logData.endpoint.includes('/auth')
-            ) {
+            );
+
+            if (shouldLog) {
+                console.log(`[Logger] Saving log: ${logData.method} ${logData.endpoint} - Status: ${logData.statusCode} - User: ${logData.user}`);
                 await Log.create(logData);
+                console.log('[Logger] Log saved successfully');
             }
         } catch (error) {
-            console.error('Error saving log:', error.message);
+            console.error('[Logger] Error saving log:', error.message);
+            console.error('[Logger] Failed logData:', JSON.stringify(logData, null, 2));
         }
     });
 
